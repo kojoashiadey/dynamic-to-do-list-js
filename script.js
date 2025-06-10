@@ -5,16 +5,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('task-input');
     const taskList = document.getElementById('task-list');
 
-    // Function to add a new task
-    function addTask() {
-        const taskText = taskInput.value.trim();
+    // Load tasks from Local Storage when the page loads
+    loadTasks();
 
-        // Check if input is not empty
-        if (taskText === '') {
-            alert('Please enter a task.');
-            return;
-        }
+    // Function to load tasks from Local Storage
+    function loadTasks() {
+        const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        storedTasks.forEach(taskText => {
+            createTaskElement(taskText);
+        });
+    }
 
+    // Function to create a task element (separated for reuse)
+    function createTaskElement(taskText) {
         // Create a new list item
         const li = document.createElement('li');
 
@@ -31,11 +34,38 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add event listener to remove task
         removeBtn.addEventListener('click', () => {
             taskList.removeChild(li);
+            updateLocalStorage();
         });
 
         // Append button to list item, then item to list
         li.appendChild(removeBtn);
         taskList.appendChild(li);
+    }
+
+    // Function to update Local Storage with current tasks
+    function updateLocalStorage() {
+        const tasks = [];
+        document.querySelectorAll('#task-list li span').forEach(taskElement => {
+            tasks.push(taskElement.textContent);
+        });
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // Function to add a new task
+    function addTask() {
+        const taskText = taskInput.value.trim();
+
+        // Check if input is not empty
+        if (taskText === '') {
+            alert('Please enter a task.');
+            return;
+        }
+
+        // Create and add the task element
+        createTaskElement(taskText);
+
+        // Update Local Storage
+        updateLocalStorage();
 
         // Clear input field
         taskInput.value = '';
